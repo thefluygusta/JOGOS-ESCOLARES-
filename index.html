@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogos Escolares</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#0b1220;color:white}
+header{padding:28px 18px;background:linear-gradient(135deg,#123d32,#087f5b);text-align:center}
+header h1{font-size:30px;margin:8px 0}
+header p{color:#d1fae5}
+main{max-width:950px;margin:auto;padding:20px}
+h2{margin-top:28px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:#172337;border:1px solid #293951;padding:18px;border-radius:14px}
+input,select,button{padding:11px;border-radius:8px;border:0;margin:4px 0;font-size:15px}
+input,select{background:#eaf0f8;color:#111;width:100%}
+button{background:#22c55e;color:#062713;font-weight:bold;cursor:pointer}
+button:hover{background:#86efac}
+.score{font-size:28px;font-weight:bold;margin:10px 0}
+table{width:100%;border-collapse:collapse;background:#172337;border-radius:10px;overflow:hidden}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #344256}
+th{color:#86efac}
+.note{color:#aab8cc;font-size:13px}
+footer{text-align:center;padding:25px;color:#9ca3af}
+</style>
+</head>
+<body>
+<header>
+<div>🏆 ⚽ 🏀 🏐</div>
+<h1>JOGOS ESCOLARES</h1>
+<p>União, respeito e espírito de equipe!</p>
+</header>
+<main>
+<section class="cards">
+<div class="card">
+<h3>🏅 Equipes</h3>
+<div class="score" id="total">4</div>
+<p>Turmas participantes</p>
+</div>
+<div class="card">
+<h3>⚽ Partidas registradas</h3>
+<div class="score" id="partidas">0</div>
+<p>Resultados cadastrados</p>
+</div>
+<div class="card">
+<h3>🥇 Líder do ranking</h3>
+<div class="score" id="lider">—</div>
+<p>Turma com mais pontos</p>
+</div>
+</section>
+
+<h2>📋 Registrar resultado</h2>
+<div class="card">
+<label>Equipe 1</label>
+<select id="e1"></select>
+<label>Placar da equipe 1</label>
+<input id="g1" type="number" min="0" value="0">
+<label>Placar da equipe 2</label>
+<input id="g2" type="number" min="0" value="0">
+<label>Equipe 2</label>
+<select id="e2"></select>
+<button onclick="registrar()">Salvar resultado</button>
+<p class="note">Vitória vale 3 pontos; empate vale 1 ponto para cada equipe.</p>
+<p id="msg"></p>
+</div>
+
+<h2>🥇 Classificação</h2>
+<div class="card">
+<table>
+<thead><tr><th>Pos.</th><th>Equipe</th><th>J</th><th>Pts</th></tr></thead>
+<tbody id="ranking"></tbody>
+</table>
+</div>
+
+<h2>👥 Equipes participantes</h2>
+<div class="card">
+<p>🟢 Turma A</p><p>🔵 Turma B</p>
+<p>🟠 Turma C</p><p>🟣 Turma D</p>
+<label>Adicionar outra turma</label>
+<input id="nova" placeholder="Ex.: Turma E">
+<button onclick="adicionar()">Adicionar equipe</button>
+<p class="note">Os dados ficam salvos neste navegador enquanto ele permitir. Esta versão inicial não sincroniza os resultados entre diferentes aparelhos.</p>
+</div>
+</main>
+<footer>Jogos Escolares • Feito para celebrar o esporte 🏆</footer>
+<script>
+let equipes=["Turma A","Turma B","Turma C","Turma D"];
+let dados={};
+let jogos=0;
+function iniciar(){
+equipes.forEach(n=>{if(!dados[n])dados[n]={j:0,p:0}});
+["e1","e2"].forEach(id=>{
+let s=document.getElementById(id),old=s.value;
+s.innerHTML="";
+equipes.forEach(n=>s.add(new Option(n,n)));
+if(equipes.includes(old))s.value=old;
+});
+atualizar();
+}
+function registrar(){
+let a=document.getElementById("e1").value;
+let b=document.getElementById("e2").value;
+let x=Number(document.getElementById("g1").value);
+let y=Number(document.getElementById("g2").value);
+if(a===b){msg("Escolha duas equipes diferentes.");return}
+if(x<0||y<0||document.getElementById("g1").value===""||document.getElementById("g2").value===""){msg("Digite os dois placares.");return}
+dados[a].j++;dados[b].j++;
+if(x>y)dados[a].p+=3;
+else if(y>x)dados[b].p+=3;
+else{dados[a].p++;dados[b].p++}
+jogos++;
+atualizar();
+msg("Resultado registrado nesta página! 🏆");
+}
+function msg(t){document.getElementById("msg").textContent=t}
+function adicionar(){
+let campo=document.getElementById("nova");
+let n=campo.value.trim();
+if(!n)return;
+if(equipes.some(e=>e.toLowerCase()===n.toLowerCase())){msg("Essa equipe já existe.");return}
+equipes.push(n);dados[n]={j:0,p:0};campo.value="";
+iniciar();msg("Equipe adicionada!");
+}
+function atualizar(){
+document.getElementById("total").textContent=equipes.length;
+document.getElementById("partidas").textContent=jogos;
+let lista=[...equipes].sort((a,b)=>dados[b].p-dados[a].p);
+document.getElementById("lider").textContent=lista.length&&dados[lista[0]].p>0?lista[0]:"—";
+document.getElementById("ranking").innerHTML=lista.map((n,i)=>`<tr><td>${i+1}º</td><td>${n}</td><td>${dados[n].j}</td><td>${dados[n].p}</td></tr>`).join("");
+}
+iniciar();
+</script>
+</body>
+</html>
